@@ -30,3 +30,11 @@ node_modules/
 .env
 
 .editorconfig
+
+/vendor/
+
+# phpunit cache
+.phpunit.cache
+.phpunit.result.cache
+
+.circleci

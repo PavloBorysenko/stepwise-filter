@@ -1,0 +1,6 @@
+parameters:
+    level: 5 # the analysis level, from 0 (loose) to 8 (strict)
+    paths: # the paths to scan
+        - stepwise-filter.php
+        - include/
+    ignoreErrors:

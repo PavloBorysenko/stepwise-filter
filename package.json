@@ -12,7 +12,13 @@
 		"lint:js": "wp-scripts lint-js",
 		"packages-update": "wp-scripts packages-update",
 		"plugin-zip": "wp-scripts plugin-zip",
-		"start": "wp-scripts start --webpack-copy-php"
+		"start": "wp-scripts start --webpack-copy-php",
+		"phpstan": "vendor/bin/phpstan analyse --memory-limit=2048M",
+		"phpcs": "vendor/bin/phpcs",
+		"phpcbf": "vendor/bin/phpcbf",
+		"phpunit": "vendor/bin/phpunit",
+		"phplint":"npm run phpcs && npm run phpstan"
+
 	},
 	"devDependencies": {
 		"@wordpress/scripts": "^30.7.0"

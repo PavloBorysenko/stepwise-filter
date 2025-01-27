@@ -3,7 +3,9 @@
 	<description>Generally-applicable sniffs for WordPress plugins.</description>
 
 	<!-- What to scan -->
-	<file>.</file>
+    <file>./stepwise-filter.php</file>
+    <file>./include/</file>
+    <file>./tests/</file>
 	<exclude-pattern>/vendor/</exclude-pattern>
 	<exclude-pattern>/node_modules/</exclude-pattern>
 
@@ -26,22 +28,16 @@
 	<!-- https://github.com/WordPress-Coding-Standards/WordPress-Coding-Standards -->
 	<!-- https://github.com/WordPress-Coding-Standards/WordPress-Coding-Standards/wiki/Customizable-sniff-properties -->
 	<config name="minimum_supported_wp_version" value="4.6"/>
-	<rule ref="WordPress"/>
-	<rule ref="WordPress.NamingConventions.PrefixAllGlobals">
-		<properties>
-			<!-- Value: replace the function, class, and variable prefixes used. Separate multiple prefixes with a comma. -->
-			<property name="prefixes" type="array" value="my-plugin"/>
-		</properties>
-	</rule>
+	<!-- Rules -->
+	<rule ref="WooCommerce-Core" />
+
 	<rule ref="WordPress.WP.I18n">
 		<properties>
-			<!-- Value: replace the text domain used. -->
-			<property name="text_domain" type="array" value="my-plugin"/>
+			<property name="text_domain" type="array" value="new-text-domain" />
 		</properties>
 	</rule>
-	<rule ref="WordPress.WhiteSpace.ControlStructureSpacing">
-		<properties>
-			<property name="blank_line_check" value="true"/>
-		</properties>
+
+	<rule ref="PHPCompatibility">
+		<exclude-pattern>tests/</exclude-pattern>
 	</rule>
 </ruleset>

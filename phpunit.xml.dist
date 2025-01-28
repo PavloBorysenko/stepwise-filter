@@ -2,7 +2,7 @@
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" bootstrap="tests/bootstrap.php" backupGlobals="false" colors="true" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.0/phpunit.xsd" cacheDirectory=".phpunit.cache">
   <testsuites>
     <testsuite name="stepwise-filter test">
-      <file>tests/testAjax.php</file>
+      <file>tests/testFilterDataBuilder.php</file>
     </testsuite>
   </testsuites>
   <groups>

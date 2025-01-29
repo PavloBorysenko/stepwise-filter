@@ -2,7 +2,7 @@
 /**
  * ResponseData.
  *
- * @package stepwise-filter
+ * @package NaGora\StepwiseFilter\Data
  */
 
 namespace NaGora\StepwiseFilter\Data;

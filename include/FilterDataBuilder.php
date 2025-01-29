@@ -2,7 +2,7 @@
 /**
  * FilterDataBuilder.
  *
- * @package stepwise-filter
+ * @package NaGora\StepwiseFilter
  */
 
 namespace NaGora\StepwiseFilter;
@@ -13,6 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 use NaGora\StepwiseFilter\Data\ResponseData;
 use NaGora\StepwiseFilter\Data\FilterData;
+use NaGora\StepwiseFilter\Filters\TaxFilter;
 
 /**
  * FilterDataBuilder.
@@ -27,6 +28,6 @@ class FilterDataBuilder {
 	 * @return ResponseData
 	 */
 	public function get_filter_data( string $slug, array $args ): ResponseData {
-		return new FilterData();
+		return new FilterData( new TaxFilter( $slug, $args ) );
 	}
 }

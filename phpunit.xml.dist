@@ -3,6 +3,7 @@
   <testsuites>
     <testsuite name="stepwise-filter test">
       <file>tests/testFilterDataBuilder.php</file>
+			<file>tests/testFilterData.php</file>
     </testsuite>
   </testsuites>
   <groups>

@@ -4,6 +4,7 @@
     <testsuite name="stepwise-filter test">
       <file>tests/testFilterDataBuilder.php</file>
 			<file>tests/testFilterData.php</file>
+			<file>tests/testTaxFilter.php</file>
     </testsuite>
   </testsuites>
   <groups>

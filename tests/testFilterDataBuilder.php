@@ -16,7 +16,7 @@ class TestFilterDataBuilder extends WP_UnitTestCase {
 	/**
 	 * Checks that the get_response_data method returns a ResponseData object.
 	 */
-	public function test_get_respose_data() {
+	public function test_return_valid_response_data() {
 		$filter_data_builder = new FilterDataBuilder();
 		$filter_data         = $filter_data_builder->get_filter_data( 'test', array() );
 

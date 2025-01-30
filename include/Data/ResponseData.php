@@ -8,6 +8,7 @@
 namespace NaGora\StepwiseFilter\Data;
 
 interface ResponseData {
+
 	/**
 	 * Get response data as an array.
 	 *

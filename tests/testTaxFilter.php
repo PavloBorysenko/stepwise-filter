@@ -165,6 +165,6 @@ class TestTaxFilter extends WP_UnitTestCase {
 		$options = $tax_filter->get_options();
 
 		$this->assertIsArray( $options );
-		$this->assertTrue(count($options) == 1);
+		$this->assertTrue(count($options) == 1, 'The number of options should be 1.');
 	}
 }

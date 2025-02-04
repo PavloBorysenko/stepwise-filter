@@ -13,23 +13,65 @@ use NaGora\StepwiseFilter\Filters\TaxFilter;
 class TestTaxFilter extends WP_UnitTestCase {
 
 	/**
+	 * Category Terms.
+	 *
+	 * @var array
+	 */
+	public static $terms = array();
+
+	/**
+	 * Set up before class.
+	 *
+	 * @param WP_UnitTest_Factory $factory Factory.
+	 */
+	public static function wpSetUpBeforeClass( $factory ) {
+		$args = array(
+			array(
+				'name' => 'Accessories',
+			),
+			array(
+				'name' => 'Clothing',
+			),
+		);
+
+		self::$terms[] = $factory->category->create_and_get( $args[0] );
+		self::$terms[] = $factory->category->create_and_get( $args[1] );
+
+		$child_arg = array(
+			'parent' => self::$terms[0]->term_id,
+			'name'   => 'Caps',
+		);
+
+		self::$terms[] = $factory->category->create_and_get( $child_arg );
+	}
+
+	/**
+	 * Tear down after class.
+	 */
+	public static function wpTearDownAfterClass() {
+		foreach ( self::$terms as $term ) {
+			wp_delete_term( $term->term_id, $term->taxonomy );
+		}
+	}
+
+
+	/**
 	 * Test data with standard taxonomy.
 	 */
 	public function test_data_with_standard_taxonomy() {
-		$taxonomies = $this->create_taxonomy();
-		$args       = array();
+		$args = array();
 
-		$tax_filter = new TaxFilter( $taxonomies[0]->taxonomy, $args );
+		$tax_filter = new TaxFilter( self::$terms[0]->taxonomy, $args );
 
-		$taxonomy      = get_taxonomy( $taxonomies[0]->taxonomy );
+		$taxonomy      = get_taxonomy( self::$terms[0]->taxonomy );
 		$taxonomy_name = ( $taxonomy ) ? $taxonomy->labels->singular_name : '';
 		$options       = $tax_filter->get_options();
 
 		$this->assertEquals( $taxonomy_name, $tax_filter->get_name() );
-		$this->assertEquals( $taxonomies[0]->taxonomy, $tax_filter->get_slug() );
+		$this->assertEquals( self::$terms[0]->taxonomy, $tax_filter->get_slug() );
 		$this->assertIsArray( $options );
 
-		foreach ( $taxonomies as $term ) {
+		foreach ( self::$terms as $term ) {
 			$this->assertTrue( isset( $options[ $term->slug ] ) );
 			$this->assertIsArray( $options[ $term->slug ] );
 
@@ -48,8 +90,6 @@ class TestTaxFilter extends WP_UnitTestCase {
 			$this->assertArrayHasKey( 'content', $options[ $term->slug ] );
 
 		}
-
-		$this->delete_taxonomy( $taxonomies );
 	}
 
 	/**
@@ -64,42 +104,67 @@ class TestTaxFilter extends WP_UnitTestCase {
 	}
 
 	/**
-	 *
-	 * Util function to create 3 categories.
-	 *
-	 * @return array
+	 * Test get options by Term ids.
 	 */
-	public function create_taxonomy() {
-		$args = array(
-			array(
-				'name' => 'Accessories',
-			),
-			array(
-				'name' => 'Clothing',
-			),
+	public function test_get_options_by_ids() {
+		$arguments  = array(
+			'include' => array( self::$terms[0]->term_id, self::$terms[1]->term_id ),
 		);
+		$tax_filter = new TaxFilter( self::$terms[0]->taxonomy, $arguments );
 
-		$categories[] = $this->factory->category->create_and_get( $args[0] );
-		$categories[] = $this->factory->category->create_and_get( $args[1] );
+		$options = $tax_filter->get_options();
 
-		$child_arg = array(
-			'parent' => $categories[0]->term_id,
-			'name'   => 'Caps',
-		);
+		$this->assertIsArray( $options );
+		$this->assertCount( 2, $options );
 
-		$categories[] = $this->factory->category->create_and_get( $child_arg );
-
-		return $categories;
+		$this->assertArrayHasKey( self::$terms[0]->slug, $options );
+		$this->assertArrayHasKey( self::$terms[1]->slug, $options );
 	}
 
 	/**
-	 * Util function to delete all created categories.
-	 *
-	 * @param array $taxonomies array of WP_Term.
+	 * Test get options if id does not exist.
 	 */
-	public function delete_taxonomy( $taxonomies ) {
-		foreach ( $taxonomies as $taxonomy ) {
-			wp_delete_term( $taxonomy->term_id, $taxonomy->taxonomy );
+	public function test_get_options_if_id_does_not_exist() {
+		$arguments  = array(
+			'include' => array( 9999 ),
+		);
+		$tax_filter = new TaxFilter( self::$terms[0]->taxonomy, $arguments );
+
+		$options = $tax_filter->get_options();
+
+		$this->assertIsArray( $options );
+		$this->assertEmpty( $options );
+	}
+
+	/**
+	 * Test get option only parent by id.
+	 */
+	public function test_get_option_only_parent_by_id() {
+
+		foreach ( self::$terms as $term ) {
+			$children   = get_term_children( $term->term_id, $term->taxonomy );
+			$arguments  = array(
+				'child_of' => $term->term_id,
+			);
+			$tax_filter = new TaxFilter( $term->taxonomy, $arguments );
+
+			$options = $tax_filter->get_options();
+
+			$this->assertIsArray( $options );
+			$this->assertEquals( count( $children ), count( $options ) );
+
 		}
+	}
+
+	public function test_get_option_only_count_not_zero() {
+		$arguments  = array(
+			'hide_empty' => true,
+		);
+		$tax_filter = new TaxFilter( self::$terms[0]->taxonomy, $arguments );
+
+		$options = $tax_filter->get_options();
+
+		$this->assertIsArray( $options );
+		$this->assertTrue(count($options) == 1);
 	}
 }

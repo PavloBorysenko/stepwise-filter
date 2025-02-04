@@ -90,8 +90,10 @@ class TaxFilter implements Filter {
 	 * Fill options. Function for late filling of options.
 	 */
 	private function fill_options() {
+
+		$this->options = array();
+
 		if ( ! $this->taxonomy ) {
-			$this->options = array();
 			return;
 		}
 
@@ -129,8 +131,11 @@ class TaxFilter implements Filter {
 			array(
 				'taxonomy'   => $this->slug,
 				'hide_empty' => isset( $this->args['hide_empty'] ) ? $this->args['hide_empty'] : false,
+				'include'    => isset( $this->args['include'] ) ? $this->args['include'] : array(),
+				'child_of'   => isset( $this->args['child_of'] ) ? $this->args['child_of'] : 0,
 			)
 		);
-		return $terms;
+
+		return is_array( $terms ) ? $terms : array();
 	}
 }

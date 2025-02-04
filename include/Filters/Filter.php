@@ -13,14 +13,14 @@ namespace NaGora\StepwiseFilter\Filters;
 interface Filter {
 
 	/**
-	 * Get slug.
+	 * Get slug. This is the main key to distinguish between filters.
 	 *
 	 * @return string
 	 */
 	public function get_slug(): string;
 
 	/**
-	 * Get name.
+	 * Get name. A title for the filter.
 	 *
 	 * @return string
 	 */
@@ -28,7 +28,7 @@ interface Filter {
 
 
 	/**
-	 * Get options.
+	 * Get options. Filter elements by which the search is performed.
 	 *
 	 * @return array
 	 */

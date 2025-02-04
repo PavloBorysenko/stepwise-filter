@@ -28,6 +28,11 @@ class TaxFilter implements Filter {
 	 */
 	private array|null $options = null;
 
+	/**
+	 * Taxonomy.
+	 *
+	 * @var \WP_Taxonomy|false
+	 */
 	private \WP_Taxonomy|false $taxonomy = false;
 
 	/**
@@ -63,14 +68,14 @@ class TaxFilter implements Filter {
 	 */
 	public function get_name(): string {
 
-		if (empty( $this->name ) ) {
+		if ( empty( $this->name ) ) {
 			$this->set_name();
 		}
 		return $this->name;
 	}
 
 	/**
-	 * Get options.
+	 * Get options. Returns an array with keys name, slag, id, count, parent, content.
 	 *
 	 * @return array
 	 */
@@ -82,12 +87,26 @@ class TaxFilter implements Filter {
 	}
 
 	/**
-	 * Fill options.
+	 * Fill options. Function for late filling of options.
 	 */
 	private function fill_options() {
-		$this->options = array(
-			'option' => 'option',
-		);
+		if ( ! $this->taxonomy ) {
+			$this->options = array();
+			return;
+		}
+
+		$terms = $this->get_terms();
+
+		foreach ( $terms as $term ) {
+			$this->options[ $term->slug ] = array(
+				'id'      => $term->term_id,
+				'name'    => $term->name,
+				'slug'    => $term->slug,
+				'count'   => $term->count,
+				'parent'  => $term->parent,
+				'content' => $term->description,
+			);
+		}
 	}
 
 	/**
@@ -96,7 +115,22 @@ class TaxFilter implements Filter {
 	 * Sets the name based on the taxonomy or the slug.
 	 */
 	private function set_name() {
-		$this->name = ($this->taxonomy)?$this->taxonomy->labels->singular_name: $this->slug;
+		$this->name = ( $this->taxonomy ) ? $this->taxonomy->labels->singular_name : $this->slug;
 	}
 
+	/**
+	 * Get terms.
+	 *
+	 * @return array
+	 */
+	private function get_terms(): array {
+
+		$terms = get_terms(
+			array(
+				'taxonomy'   => $this->slug,
+				'hide_empty' => isset( $this->args['hide_empty'] ) ? $this->args['hide_empty'] : false,
+			)
+		);
+		return $terms;
+	}
 }

@@ -132,6 +132,7 @@ class TaxFilter implements Filter {
 				'taxonomy'   => $this->slug,
 				'hide_empty' => isset( $this->args['hide_empty'] ) ? $this->args['hide_empty'] : false,
 				'include'    => isset( $this->args['include'] ) ? $this->args['include'] : array(),
+				'exclude'    => isset( $this->args['exclude'] ) ? $this->args['exclude'] : array(),
 				'child_of'   => isset( $this->args['child_of'] ) ? $this->args['child_of'] : 0,
 			)
 		);

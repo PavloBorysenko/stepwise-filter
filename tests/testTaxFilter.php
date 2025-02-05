@@ -25,6 +25,7 @@ class TestTaxFilter extends WP_UnitTestCase {
 	 * @param WP_UnitTest_Factory $factory Factory.
 	 */
 	public static function wpSetUpBeforeClass( $factory ) {
+
 		$args = array(
 			array(
 				'name' => 'Accessories',
@@ -34,15 +35,21 @@ class TestTaxFilter extends WP_UnitTestCase {
 			),
 		);
 
-		self::$terms[] = $factory->category->create_and_get( $args[0] );
-		self::$terms[] = $factory->category->create_and_get( $args[1] );
+		$term = $factory->category->create_and_get( $args[0] );
+		$factory->category->create( $args[1] );
 
 		$child_arg = array(
-			'parent' => self::$terms[0]->term_id,
+			'parent' => $term->term_id,
 			'name'   => 'Caps',
 		);
+		$factory->category->create( $child_arg );
 
-		self::$terms[] = $factory->category->create_and_get( $child_arg );
+		self::$terms = get_terms(
+			array(
+				'taxonomy'   => $term->taxonomy,
+				'hide_empty' => false,
+			)
+		);
 	}
 
 	/**
@@ -137,6 +144,21 @@ class TestTaxFilter extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test get option exclude by id.
+	 */
+	public function test_get_option_exclude_by_id() {
+
+		$arguments  = array(
+			'exclude' => array( self::$terms[0]->term_id ),
+		);
+		$tax_filter = new TaxFilter( self::$terms[0]->taxonomy, $arguments );
+
+		$options = $tax_filter->get_options();
+
+		$this->assertArrayNotHasKey( self::$terms[0]->slug, $options );
+	}
+
+	/**
 	 * Test get option only parent by id.
 	 */
 	public function test_get_option_only_parent_by_id() {
@@ -156,15 +178,23 @@ class TestTaxFilter extends WP_UnitTestCase {
 		}
 	}
 
+	/**
+	 * Test get option only count not zero.
+	 */
 	public function test_get_option_only_count_not_zero() {
 		$arguments  = array(
 			'hide_empty' => true,
 		);
 		$tax_filter = new TaxFilter( self::$terms[0]->taxonomy, $arguments );
+		$count      = 0;
+		foreach ( self::$terms as $term ) {
+			if ( $term->count > 0 ) {
+				++$count;
+  			}
+		}
 
 		$options = $tax_filter->get_options();
 
-		$this->assertIsArray( $options );
-		$this->assertTrue(count($options) == 1, 'The number of options should be 1.');
+		$this->assertCount( $count, $options );
 	}
 }

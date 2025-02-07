@@ -1,16 +1,16 @@
 <?php
 /**
- * Filter.
+ * Item.
  *
- * @package NaGora\StepwiseFilter\Filters
+ * @package NaGora\StepwiseFilter\FilterItems
  */
 
-namespace NaGora\StepwiseFilter\Filters;
+namespace NaGora\StepwiseFilter\FilterItems;
 
 /**
- * Filter.
+ * Item.
  */
-interface Filter {
+interface Item {
 
 	/**
 	 * Get slug. This is the main key to distinguish between filters.

@@ -2,17 +2,17 @@
 /**
  * TaxFilter.
  *
- * @package NaGora\StepwiseFilter\Filters
+ * @package NaGora\StepwiseFilter\FilterItems
  */
 
-namespace NaGora\StepwiseFilter\Filters;
+namespace NaGora\StepwiseFilter\FilterItems;
 
-use NaGora\StepwiseFilter\Filters\Filter;
+use NaGora\StepwiseFilter\FilterItems\Item;
 
 /**
  * TaxFilter.
  */
-class TaxFilter implements Filter {
+class TaxFilter implements Item {
 
 	/**
 	 * Name of the filter.
@@ -47,9 +47,14 @@ class TaxFilter implements Filter {
 
 	/**
 	 * Set taxonomy data.
+	 *
+	 * @throws \Exception If taxonomy does not exist.
 	 */
 	private function set_taxonomy_data() {
 		$this->taxonomy = get_taxonomy( $this->slug );
+		if ( ! $this->taxonomy ) {
+			throw new \Exception( 'Taxonomy ' . esc_html( $this->slug ) . ' does not exist.' );
+		}
 	}
 
 	/**
@@ -92,10 +97,6 @@ class TaxFilter implements Filter {
 	private function fill_options() {
 
 		$this->options = array();
-
-		if ( ! $this->taxonomy ) {
-			return;
-		}
 
 		$terms = $this->get_terms();
 

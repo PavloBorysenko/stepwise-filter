@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 use NaGora\StepwiseFilter\Data\ResponseData;
 use NaGora\StepwiseFilter\Data\FilterData;
-use NaGora\StepwiseFilter\Filters\TaxFilter;
+use NaGora\StepwiseFilter\SlugResolver\FilterDataResolver;
 
 /**
  * FilterDataBuilder.
@@ -28,6 +28,10 @@ class FilterDataBuilder {
 	 * @return ResponseData
 	 */
 	public function get_filter_data( string $slug, array $args ): ResponseData {
-		return new FilterData( new TaxFilter( $slug, $args ) );
+
+		$filter_data_resolver = new FilterDataResolver();
+		$filter_item          = $filter_data_resolver->get_object( $slug, $args );
+
+		return new FilterData( $filter_item );
 	}
 }

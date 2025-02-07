@@ -5,7 +5,7 @@
  * @package NaGora\StepwiseFilter
  */
 
-use NaGora\StepwiseFilter\Filters\TaxFilter;
+use NaGora\StepwiseFilter\FilterItems\TaxFilter;
 
 /**
  * Class TestTaxFilter.
@@ -103,11 +103,11 @@ class TestTaxFilter extends WP_UnitTestCase {
 	 * Test if taxonomy does not exist.
 	 */
 	public function test_if_taxonomy_does_not_exist() {
-		$slug       = 'non-existent-taxonomy';
+		$slug = 'non-existent-taxonomy';
+
+		$this->expectException( \Exception::class );
+
 		$tax_filter = new TaxFilter( $slug, array() );
-		$this->assertEmpty( $tax_filter->get_options(), 'The options array should be empty.' );
-		$this->assertEquals( $slug, $tax_filter->get_slug() );
-		$this->assertEquals( $slug, $tax_filter->get_name() );
 	}
 
 	/**
@@ -190,7 +190,7 @@ class TestTaxFilter extends WP_UnitTestCase {
 		foreach ( self::$terms as $term ) {
 			if ( $term->count > 0 ) {
 				++$count;
-  			}
+			}
 		}
 
 		$options = $tax_filter->get_options();

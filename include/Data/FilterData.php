@@ -7,7 +7,7 @@
 
 namespace NaGora\StepwiseFilter\Data;
 
-use NaGora\StepwiseFilter\Filters\Filter;
+use NaGora\StepwiseFilter\FilterItems\Item;
 
 /**
  * Class ResponseData.
@@ -17,9 +17,9 @@ class FilterData implements ResponseData {
 	/**
 	 * FilterData constructor.
 	 *
-	 * @param \NaGora\StepwiseFilter\Filters\Filter $filter Filter.
+	 * @param \NaGora\StepwiseFilter\FilterItems\Item $filter_item Item.
 	 */
-	public function __construct( private Filter $filter ) {
+	public function __construct( private Item $filter_item ) {
 	}
 
 	/**
@@ -29,9 +29,9 @@ class FilterData implements ResponseData {
 	 */
 	public function to_array(): array {
 		return array(
-			'slug'    => $this->filter->get_slug(),
-			'name'    => $this->filter->get_name(),
-			'options' => $this->filter->get_options(),
+			'slug'    => $this->filter_item->get_slug(),
+			'name'    => $this->filter_item->get_name(),
+			'options' => $this->filter_item->get_options(),
 		);
 	}
 }

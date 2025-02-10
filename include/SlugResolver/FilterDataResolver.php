@@ -8,28 +8,12 @@
 namespace NaGora\StepwiseFilter\SlugResolver;
 
 use NaGora\StepwiseFilter\SlugResolver\EntityResolver;
-use NaGora\StepwiseFilter\FilterItems\TaxFilter;
-use NaGora\StepwiseFilter\FilterItems\Error;
 use NaGora\StepwiseFilter\FilterItems\Item as FilterItem;
 
 /**
  * FilterDataResolver.
  */
 class FilterDataResolver implements EntityResolver {
-
-	/**
-	 * Get type.
-	 *
-	 * @param string $slug Slug.
-	 *
-	 * @return string
-	 */
-	public function get_type( $slug ): string {
-		if ( taxonomy_exists( $slug ) ) {
-			return 'taxonomy';
-		}
-		return 'error';
-	}
 
 	/**
 	 * Get object.
@@ -40,12 +24,17 @@ class FilterDataResolver implements EntityResolver {
 	 * @return FilterItem
 	 */
 	public function get_object( string $slug, array $args ): FilterItem {
-		switch ( $this->get_type( $slug ) ) {
 
-			case 'taxonomy':
-				return new TaxFilter( $slug, $args );
-
+		if ( FilterItem::is_special( $slug ) ) {
+			return FilterItem::get_special( $slug, $args );
 		}
-		return new Error( $slug, $args );
+
+		if ( FilterItem::is_taxonomy( $slug ) ) {
+			return FilterItem::get_tax_filter( $slug, $args );
+		}
+
+		// FilterItem::is_meta( $slug ) TODO.
+
+		return FilterItem::get_error( $slug, $args );
 	}
 }

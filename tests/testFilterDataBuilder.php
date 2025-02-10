@@ -2,7 +2,7 @@
 /**
  * TestFilterDataBuilder
  *
- * @package stepwise-filter
+ * @package NaGora\StepwiseFilter
  */
 
 use NaGora\StepwiseFilter\FilterDataBuilder;
@@ -73,8 +73,9 @@ class TestFilterDataBuilder extends WP_UnitTestCase {
 	 */
 	public static function slugs_data_provider(): array {
 		return array(
-			array( 'not_existing_slug' ),
-			array( 'submit' ),
+			'not_existing' => array( 'not_existing_slug' ),
+			'empty slug'   => array( '' ),
+			'submit'       => array( 'submit' ),
 		);
 	}
 }

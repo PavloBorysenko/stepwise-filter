@@ -1,6 +1,6 @@
 <?php
 /**
- * Error.
+ * Submit.
  *
  * @package NaGora\StepwiseFilter\FilterItems
  */
@@ -10,9 +10,9 @@ namespace NaGora\StepwiseFilter\FilterItems;
 use NaGora\StepwiseFilter\FilterItems\Item;
 
 /**
- * Error.
+ * Submit.
  */
-class Error extends Item {
+class Submit extends Item {
 
 	/**
 	 * Get slug.
@@ -20,7 +20,7 @@ class Error extends Item {
 	 * @return string
 	 */
 	public function get_slug(): string {
-		return 'error';
+		return 'submit';
 	}
 
 	/**
@@ -29,7 +29,7 @@ class Error extends Item {
 	 * @return string
 	 */
 	public function get_name(): string {
-		return esc_html__( 'Error', 'stepwise-filter' );
+		return esc_html__( 'Submit', 'stepwise-filter' );
 	}
 
 	/**
@@ -39,14 +39,15 @@ class Error extends Item {
 	 */
 	public function get_options(): array {
 
-		$message = isset( $this->args['message'] )
-		? $this->args['message']
-		: esc_html__( 'Such filter element does not exist', 'stepwise-filter' );
-
 		return array(
-			'slug'    => $this->slug,
-			'message' => $message,
-			'args'    => $this->args,
+			'filter' => array(
+				'name'    => esc_html__( 'Filter', 'stepwise-filter' ),
+				'viseble' => true,
+			),
+			'reset'  => array(
+				'name'    => esc_html__( 'Reset', 'stepwise-filter' ),
+				'viseble' => true,
+			),
 		);
 	}
 }

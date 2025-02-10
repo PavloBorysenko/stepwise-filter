@@ -13,15 +13,6 @@ namespace NaGora\StepwiseFilter\SlugResolver;
 interface EntityResolver {
 
 	/**
-	 * Get type.
-	 *
-	 * @param string $slug Slug.
-	 *
-	 * @return string
-	 */
-	public function get_type( string $slug ): string;
-
-	/**
 	 * Get object.
 	 *
 	 * @param string $slug Slug.

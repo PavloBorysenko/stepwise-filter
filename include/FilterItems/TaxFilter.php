@@ -12,7 +12,7 @@ use NaGora\StepwiseFilter\FilterItems\Item;
 /**
  * TaxFilter.
  */
-class TaxFilter implements Item {
+class TaxFilter extends Item {
 
 	/**
 	 * Name of the filter.
@@ -41,7 +41,7 @@ class TaxFilter implements Item {
 	 * @param string $slug Taxonomy Filter slug.
 	 * @param array  $args Arguments.
 	 */
-	public function __construct( private string $slug, private array $args ) {
+	public function __construct( protected string $slug, protected array $args ) {
 		$this->set_taxonomy_data();
 	}
 

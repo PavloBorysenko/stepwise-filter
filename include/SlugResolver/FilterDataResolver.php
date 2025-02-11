@@ -34,7 +34,7 @@ class FilterDataResolver implements EntityResolver {
 		}
 
 		// FilterItem::is_meta( $slug ) TODO.
-
+		$args['message'] = esc_html__( 'Such filter element does not exist', 'stepwise-filter' );
 		return FilterItem::get_error( $slug, $args );
 	}
 }

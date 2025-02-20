@@ -11,6 +11,8 @@
 			<file>tests/testFilterData.php</file>
 			<file>tests/testTaxFilter.php</file>
 			<file>tests/testFilterDataResolver.php</file>
+			<file>tests/testError.php</file>
+			<file>tests/testSubmit.php</file>
     </testsuite>
   </testsuites>
   <groups>

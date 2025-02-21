@@ -14,6 +14,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 use NaGora\StepwiseFilter\Data\ResponseData;
 use NaGora\StepwiseFilter\Data\FilterData;
 use NaGora\StepwiseFilter\SlugResolver\FilterDataResolver;
+use NaGora\StepwiseFilter\Query\FilterQuery;
+use NaGora\StepwiseFilter\Query\WCFilterQuery;
 
 /**
  * FilterDataBuilder.
@@ -33,5 +35,16 @@ class FilterDataBuilder {
 		$filter_item          = $filter_data_resolver->get_object( $slug, $args );
 
 		return new FilterData( $filter_item );
+	}
+
+	/**
+	 * Get qurent query object.
+	 *
+	 * @return WPFilterQuery
+	 */
+	public function get_qurent_query( array $current_taxonomy = array()): FilterQuery {
+		$wp_filter_query = new WCFilterQuery();
+		$wp_filter_query->set_current_taxonomy( $current_taxonomy );
+		return $wp_filter_query;
 	}
 }

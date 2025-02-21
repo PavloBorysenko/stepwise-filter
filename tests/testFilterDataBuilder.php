@@ -7,6 +7,7 @@
 
 use NaGora\StepwiseFilter\FilterDataBuilder;
 use NaGora\StepwiseFilter\Data\ResponseData;
+use NaGora\StepwiseFilter\Query\FilterQuery;
 
 /**
  * TestFilterDataBuilder.
@@ -64,6 +65,13 @@ class TestFilterDataBuilder extends WP_UnitTestCase {
 	public function test_get_filter_data_taxonomy() {
 		$response_data = self::$filter_data_builder->get_filter_data( self::$term->taxonomy, array() );
 		$this->assertTrue( $response_data instanceof ResponseData );
+	}
+
+	public function test_get_qurent_query() {
+		$current_taxonomy = array('category' => 'accessories');
+		$current_search   = array();
+		$qurent_query = self::$filter_data_builder->get_qurent_query($current_taxonomy, $current_search );
+		$this->assertInstanceOf( FilterQuery::class, $qurent_query );
 	}
 
 	/**

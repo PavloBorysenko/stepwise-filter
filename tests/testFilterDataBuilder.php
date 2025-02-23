@@ -67,11 +67,14 @@ class TestFilterDataBuilder extends WP_UnitTestCase {
 		$this->assertTrue( $response_data instanceof ResponseData );
 	}
 
+	/**
+	 * Test get qurent query.
+	 */
 	public function test_get_qurent_query() {
-		$current_taxonomy = array('category' => 'accessories');
+		$current_taxonomy = array( 'category' => 'accessories' );
 		$current_search   = array();
-		$qurent_query = self::$filter_data_builder->get_qurent_query($current_taxonomy, $current_search );
-		$this->assertInstanceOf( FilterQuery::class, $qurent_query );
+		$qurent_query_obj = self::$filter_data_builder->get_qurent_query( $current_taxonomy, $current_search );
+		$this->assertInstanceOf( FilterQuery::class, $qurent_query_obj );
 	}
 
 	/**

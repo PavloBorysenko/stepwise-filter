@@ -13,6 +13,7 @@
 			<file>tests/testFilterDataResolver.php</file>
 			<file>tests/testError.php</file>
 			<file>tests/testSubmit.php</file>
+			<file>tests/testWCFilterQuery.php</file>
     </testsuite>
   </testsuites>
   <groups>

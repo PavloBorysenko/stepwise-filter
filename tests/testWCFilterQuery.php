@@ -49,31 +49,60 @@ class TestWCFilterQuery extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test set current taxonomy method. Real taxonomy, fake taxonomy, reset taxonomy.
+	 * Test get query.
 	 */
-	public function test_set_current_taxonomy() {
-
-		$taxonomy_slug = self::$terms[0]->taxonomy;
-		$term_slug     = self::$terms[0]->slug;
-		$fake_taxonomy = array( 'taxonomy_does_not_exist' => 'false' );
-		$filter_query  = new WCFilterQuery();
-
-		$reflection_filter_query   = new ReflectionClass( $filter_query );
-		$current_taxonomy_property = $reflection_filter_query->getProperty( 'current_taxonomy' );
-		$current_taxonomy_property->setAccessible( true );
-
-		$filter_query->set_current_taxonomy( array( $taxonomy_slug => $term_slug ) );
-		$this->assertTrue( $filter_query->is_current_taxonomy(), 'Correct current taxonomy is set' );
-		$current_taxonomy = $current_taxonomy_property->getValue( $filter_query );
-		$this->assertEquals( self::$terms[0]->term_id, $current_taxonomy['terms'] );
-		$this->assertEquals( $taxonomy_slug, $current_taxonomy['taxonomy'] );
-
-		$filter_query->set_current_taxonomy( array() );
-		$this->assertFalse( $filter_query->is_current_taxonomy(), 'Reset current taxonomy' );
-
-		$filter_query->set_current_taxonomy( $fake_taxonomy );
-		$this->assertFalse( $filter_query->is_current_taxonomy(), 'Incorrect current taxonomy is set, assert false' );
+	public function test_get_query_initial_args() {
+		$filter_query_obj = new WCFilterQuery();
+		$query_args       = $filter_query_obj->get_query_args();
+		$this->assertArrayHasKey( 'post_type', $query_args );
+		$this->assertArrayHasKey( 'wc_query', $query_args );
+		$this->assertArrayHasKey( 'stepwise_filter', $query_args );
 	}
 
+	/**
+	 * Test set initial query args.
+	 */
+	public function test_set_initial_query_args() {
+
+		$filter_query_obj       = new WCFilterQuery();
+		$new_initial_query_args = array(
+			'post__in'  => '1,2,3', // set new arg.
+			'post_type' => 'product,variation', // change existing arg.
+		);
+
+		$query_args = $filter_query_obj->get_query_args();
+		$this->assertArrayNotHasKey( 'post__in', $query_args );
+		$this->assertEquals( $query_args['post_type'], 'product' );
+
+		$filter_query_obj->set_initial_query_args( $new_initial_query_args );
+		$query_args = $filter_query_obj->get_query_args();
+
+		$this->assertArrayHasKey( 'post__in', $query_args );
+		$this->assertEquals( $new_initial_query_args['post__in'], $query_args['post__in'] );
+		$this->assertEquals( $new_initial_query_args['post_type'], $query_args['post_type'] );
+	}
+
+	public function test_get_ids() {
+		$filter_query_obj = new WCFilterQuery();
+
+		$mock_post_ids = [301, 302, 303];
+
+		$reflection_filter_query   = new ReflectionClass( $filter_query_obj );
+		$query_property = $reflection_filter_query->getProperty( 'query' );
+		$query_property->setAccessible( true );
+
+		$wp_query_mock = $this->getMockBuilder(\WP_Query::class)
+			->onlyMethods(['get_posts'])
+			->getMock();
+
+		$wp_query_mock->expects($this->once())
+			->method('get_posts')
+			->willReturn($mock_post_ids);
+
+		$query_property->setValue($mock, 'mocked_value');
+
+
+		$result = $filter_query_obj->get_ids();
+	}
 
 }

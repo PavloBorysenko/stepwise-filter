@@ -13,16 +13,16 @@ namespace NaGora\StepwiseFilter\Query;
 interface FilterQuery {
 
 	/**
-	 * Set current taxonomy.
+	 * Get query args for WP_Query.
 	 *
-	 * @param array $current_taxonomy Current taxonomy.
+	 * @return array
 	 */
-	public function set_current_taxonomy( array $current_taxonomy ): void;
+	public function get_query_args(): array;
 
 	/**
-	 * If isset current taxonomy in query.
+	 * Set initial query args.
 	 *
-	 * @return bool
+	 * @param array $new_query_args New query args.
 	 */
-	public function is_current_taxonomy(): bool;
+	public function set_initial_query_args( array $new_query_args ): void;
 }

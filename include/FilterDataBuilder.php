@@ -40,13 +40,10 @@ class FilterDataBuilder {
 	/**
 	 * Get qurent query object.
 	 *
-	 * @param array $current_taxonomy Current taxonomy.
-	 *
 	 * @return WCFilterQuery
 	 */
-	public function get_qurent_query( array $current_taxonomy = array() ): FilterQuery {
+	public function get_qurent_query(): FilterQuery {
 		$wp_filter_query = new WCFilterQuery();
-		$wp_filter_query->set_current_taxonomy( $current_taxonomy );
 		return $wp_filter_query;
 	}
 }

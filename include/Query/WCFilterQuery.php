@@ -15,65 +15,49 @@ use NaGora\StepwiseFilter\Query\FilterQuery;
 class WCFilterQuery implements FilterQuery {
 
 	/**
-	 * Current taxonomy - is tax_query arguments.
-	 *
-	 * @see https://developer.wordpress.org/reference/classes/wp_query/#taxonomy-parameters
+	 * WP Query arguments.
 	 *
 	 * @var array
 	 */
-	private array $current_taxonomy = array();
+	private array $query_args = array();
 
 	/**
-	 * Post type.
+	 * WP Query.
 	 *
-	 * @var string
+	 * @var \WP_Query
 	 */
-	private string $post_type = 'product';
+	private \WP_Query $query;
 
 	/**
 	 * WPFilterQuery constructor.
 	 */
-	public function __construct() {
+	public function __construct( ) {
+
+		$this->query      = new \WP_Query();
+
+		$this->query_args = array(
+			'post_type'       => 'product',
+			'wc_query'        => 'product_query',
+			'filds'           => 'ids',
+			'stepwise_filter' => 'count',
+		);
 	}
 
 	/**
-	 * Set current taxonomy.
+	 * Set initial query args.
 	 *
-	 * @param array $current_taxonomy Current taxonomy.
+	 * @param array $new_query_args New query args.
 	 */
-	public function set_current_taxonomy( array $current_taxonomy ): void {
-		$this->current_taxonomy = ! empty( $current_taxonomy ) ? $this->generate_current_taxonomy_query( $current_taxonomy ) : array();
+	public function set_initial_query_args( array $new_query_args ): void {
+		$this->query_args = array_merge( $this->query_args, $new_query_args );
 	}
 
 	/**
-	 * Generate current taxonomy query.
+	 * Get query args for WP_Query.
 	 *
-	 * @param array $current_taxonomy Current taxonomy.
-	 *
-	 * @return array tax_query arguments for wp_query.
+	 * @return array
 	 */
-	private function generate_current_taxonomy_query( array $current_taxonomy ): array {
-		$taxonomy  = array_key_first( $current_taxonomy );
-		$term_slug = $current_taxonomy[ $taxonomy ];
-		$tax_query = array();
-
-		$term = get_term_by( 'slug', $term_slug, $taxonomy );
-		if ( $term ) {
-			$tax_query = array(
-				'taxonomy' => $term->taxonomy,
-				'field'    => 'id',
-				'terms'    => $term->term_id,
-			);
-		}
-		return $tax_query;
-	}
-
-	/**
-	 * If isset current taxonomy in query.
-	 *
-	 * @return bool
-	 */
-	public function is_current_taxonomy(): bool {
-		return ! empty( $this->current_taxonomy );
+	public function get_query_args(): array {
+		return $this->query_args;
 	}
 }

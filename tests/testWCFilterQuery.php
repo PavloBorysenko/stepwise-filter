@@ -6,6 +6,7 @@
  */
 
 use NaGora\StepwiseFilter\Query\WCFilterQuery;
+use NaGora\StepwiseFilter\Util\Cache\WPCache;
 
 /**
  * Class TestWCFilterQuery.
@@ -52,7 +53,7 @@ class TestWCFilterQuery extends WP_UnitTestCase {
 	 * Test get query.
 	 */
 	public function test_get_query_initial_args() {
-		$filter_query_obj = new WCFilterQuery();
+		$filter_query_obj = new WCFilterQuery( new WPCache( 'swf_test_count_' ) );
 		$query_args       = $filter_query_obj->get_query_args();
 		$this->assertArrayHasKey( 'post_type', $query_args );
 		$this->assertArrayHasKey( 'wc_query', $query_args );
@@ -64,7 +65,7 @@ class TestWCFilterQuery extends WP_UnitTestCase {
 	 */
 	public function test_set_initial_query_args() {
 
-		$filter_query_obj       = new WCFilterQuery();
+		$filter_query_obj       = new WCFilterQuery( new WPCache( 'swf_test_count_' ) );
 		$new_initial_query_args = array(
 			'post__in'  => '1,2,3', // set new arg.
 			'post_type' => 'product,variation', // change existing arg.
@@ -82,27 +83,33 @@ class TestWCFilterQuery extends WP_UnitTestCase {
 		$this->assertEquals( $new_initial_query_args['post_type'], $query_args['post_type'] );
 	}
 
+	/**
+	 * Test get ids and cache.
+	 */
 	public function test_get_ids() {
-		$filter_query_obj = new WCFilterQuery();
+		$filter_query_obj = new WCFilterQuery( new WPCache( 'swf_test_count_', 10 ) );
 
-		$mock_post_ids = [301, 302, 303];
+		$mock_post_ids = array( 301, 302, 303 );
 
-		$reflection_filter_query   = new ReflectionClass( $filter_query_obj );
-		$query_property = $reflection_filter_query->getProperty( 'query' );
+		$reflection_filter_query = new ReflectionClass( $filter_query_obj );
+		$query_property          = $reflection_filter_query->getProperty( 'query' );
 		$query_property->setAccessible( true );
 
-		$wp_query_mock = $this->getMockBuilder(\WP_Query::class)
-			->onlyMethods(['get_posts'])
+		$wp_query_mock = $this->getMockBuilder( \WP_Query::class )
+			->onlyMethods( array( 'get_posts' ) )
 			->getMock();
 
-		$wp_query_mock->expects($this->once())
-			->method('get_posts')
-			->willReturn($mock_post_ids);
+		$wp_query_mock->expects( $this->once() )
+			->method( 'get_posts' )
+			->willReturn( $mock_post_ids );
 
-		$query_property->setValue($mock, 'mocked_value');
-
+		$query_property->setValue( $filter_query_obj, $wp_query_mock );
 
 		$result = $filter_query_obj->get_ids();
-	}
+		$this->assertSame( $mock_post_ids, $result );
 
+		// Does class cache work.
+		$result = $filter_query_obj->get_ids();
+		$this->assertSame( $mock_post_ids, $result );
+	}
 }

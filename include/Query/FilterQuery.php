@@ -25,4 +25,11 @@ interface FilterQuery {
 	 * @param array $new_query_args New query args.
 	 */
 	public function set_initial_query_args( array $new_query_args ): void;
+
+	/**
+	 * Get ids.
+	 *
+	 * @return array post ids.
+	 */
+	public function get_ids(): array;
 }

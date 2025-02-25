@@ -16,6 +16,7 @@ use NaGora\StepwiseFilter\Data\FilterData;
 use NaGora\StepwiseFilter\SlugResolver\FilterDataResolver;
 use NaGora\StepwiseFilter\Query\FilterQuery;
 use NaGora\StepwiseFilter\Query\WCFilterQuery;
+use NaGora\StepwiseFilter\Util\Cache\WPCache;
 
 /**
  * FilterDataBuilder.
@@ -43,7 +44,8 @@ class FilterDataBuilder {
 	 * @return WCFilterQuery
 	 */
 	public function get_qurent_query(): FilterQuery {
-		$wp_filter_query = new WCFilterQuery();
+		$cache           = new WPCache( 'swf_count_' );
+		$wp_filter_query = new WCFilterQuery( $cache );
 		return $wp_filter_query;
 	}
 }

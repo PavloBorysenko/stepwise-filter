@@ -7,6 +7,7 @@
 
 use NaGora\StepwiseFilter\Query\WCFilterQuery;
 use NaGora\StepwiseFilter\Util\Cache\WPCache;
+use NaGora\StepwiseFilter\Query\Modifier\SearchModifier;
 
 /**
  * Class TestWCFilterQuery.
@@ -14,47 +15,32 @@ use NaGora\StepwiseFilter\Util\Cache\WPCache;
 class TestWCFilterQuery extends WP_UnitTestCase {
 
 	/**
-	 * Category Terms.
+	 * Filter query object.
 	 *
-	 * @var array
+	 * @var WCFilterQuery
 	 */
-	public static $terms = array();
+	public $filter_query_obj;
 
 	/**
-	 * Set up before class.
-	 *
-	 * @param WP_UnitTest_Factory $factory Factory.
+	 * Set up.
 	 */
-	public static function wpSetUpBeforeClass( $factory ) {
-
-		$args = array(
-			array(
-				'name' => 'Accessories',
-			),
-			array(
-				'name' => 'Clothing',
-			),
-		);
-
-		self::$terms[] = $factory->category->create_and_get( $args[0] );
-		self::$terms[] = $factory->category->create_and_get( $args[1] );
+	public function setUp(): void {
+		parent::setUp();
+		$this->filter_query_obj = new WCFilterQuery( new WPCache( 'swf_test_count_' ) );
 	}
 
 	/**
-	 * Tear down after class.
+	 * Tear down.
 	 */
-	public static function wpTearDownAfterClass() {
-		foreach ( self::$terms as $term ) {
-			wp_delete_term( $term->term_id, $term->taxonomy );
-		}
+	public function tearDown(): void {
+		parent::tearDown();
+		$this->filter_query_obj = null;
 	}
-
 	/**
 	 * Test get query.
 	 */
 	public function test_get_query_initial_args() {
-		$filter_query_obj = new WCFilterQuery( new WPCache( 'swf_test_count_' ) );
-		$query_args       = $filter_query_obj->get_query_args();
+		$query_args = $this->filter_query_obj->get_query_args();
 		$this->assertArrayHasKey( 'post_type', $query_args );
 		$this->assertArrayHasKey( 'wc_query', $query_args );
 		$this->assertArrayHasKey( 'stepwise_filter', $query_args );
@@ -65,18 +51,17 @@ class TestWCFilterQuery extends WP_UnitTestCase {
 	 */
 	public function test_set_initial_query_args() {
 
-		$filter_query_obj       = new WCFilterQuery( new WPCache( 'swf_test_count_' ) );
 		$new_initial_query_args = array(
 			'post__in'  => '1,2,3', // set new arg.
 			'post_type' => 'product,variation', // change existing arg.
 		);
 
-		$query_args = $filter_query_obj->get_query_args();
+		$query_args = $this->filter_query_obj->get_query_args();
 		$this->assertArrayNotHasKey( 'post__in', $query_args );
 		$this->assertEquals( $query_args['post_type'], 'product' );
 
-		$filter_query_obj->set_initial_query_args( $new_initial_query_args );
-		$query_args = $filter_query_obj->get_query_args();
+		$this->filter_query_obj->set_initial_query_args( $new_initial_query_args );
+		$query_args = $this->filter_query_obj->get_query_args();
 
 		$this->assertArrayHasKey( 'post__in', $query_args );
 		$this->assertEquals( $new_initial_query_args['post__in'], $query_args['post__in'] );
@@ -87,11 +72,10 @@ class TestWCFilterQuery extends WP_UnitTestCase {
 	 * Test get ids and cache.
 	 */
 	public function test_get_ids() {
-		$filter_query_obj = new WCFilterQuery( new WPCache( 'swf_test_count_', 10 ) );
 
 		$mock_post_ids = array( 301, 302, 303 );
 
-		$reflection_filter_query = new ReflectionClass( $filter_query_obj );
+		$reflection_filter_query = new ReflectionClass( $this->filter_query_obj );
 		$query_property          = $reflection_filter_query->getProperty( 'query' );
 		$query_property->setAccessible( true );
 
@@ -103,13 +87,33 @@ class TestWCFilterQuery extends WP_UnitTestCase {
 			->method( 'get_posts' )
 			->willReturn( $mock_post_ids );
 
-		$query_property->setValue( $filter_query_obj, $wp_query_mock );
+		$query_property->setValue( $this->filter_query_obj, $wp_query_mock );
 
-		$result = $filter_query_obj->get_ids();
+		$result = $this->filter_query_obj->get_ids();
 		$this->assertSame( $mock_post_ids, $result );
 
 		// Does class cache work.
-		$result = $filter_query_obj->get_ids();
+		$result = $this->filter_query_obj->get_ids();
 		$this->assertSame( $mock_post_ids, $result );
+	}
+
+	/**
+	 * Test set modifier and is_search.
+	 */
+	public function test_set_modifier_and_is_search() {
+
+		$this->assertFalse( $this->filter_query_obj->is_search(), 'is_search should be false, modifier was not set' );
+
+		$mock_modifier = $this->getMockForAbstractClass( SearchModifier::class );
+		$this->filter_query_obj->set_modifier( $mock_modifier );
+
+		$reflection_filter_query = new ReflectionClass( $this->filter_query_obj );
+		$modifier_property       = $reflection_filter_query->getProperty( 'search_modifier' );
+		$modifier_property->setAccessible( true );
+
+		$modifier_obj = $modifier_property->getValue( $this->filter_query_obj );
+
+		$this->assertInstanceOf( SearchModifier::class, $modifier_obj );
+		$this->assertTrue( $this->filter_query_obj->is_search(), 'is_search should be true, modifier was set' );
 	}
 }

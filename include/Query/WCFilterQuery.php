@@ -88,6 +88,10 @@ class WCFilterQuery implements FilterQuery {
 	 * @return array
 	 */
 	private function generate_query_args(): array {
+
+		if ( $this->is_search() ) {
+			return $this->search_modifier->modify( $this->query_args );
+		}
 		return $this->query_args;
 	}
 

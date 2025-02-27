@@ -116,4 +116,51 @@ class TestWCFilterQuery extends WP_UnitTestCase {
 		$this->assertInstanceOf( SearchModifier::class, $modifier_obj );
 		$this->assertTrue( $this->filter_query_obj->is_search(), 'is_search should be true, modifier was set' );
 	}
+
+	/**
+	 * Test generate query args.
+	 */
+	public function test_generate_query_args() {
+
+		$reflection                 = new ReflectionClass( $this->filter_query_obj );
+		$method_generate_query_args = $reflection->getMethod( 'generate_query_args' );
+		$method_generate_query_args->setAccessible( true );
+		$query_args = $method_generate_query_args->invoke( $this->filter_query_obj );
+
+		$this->assertArrayHasKey( 'post_type', $query_args );
+		$this->assertArrayHasKey( 'wc_query', $query_args );
+		$this->assertArrayHasKey( 'stepwise_filter', $query_args );
+
+		$mock_modifier = $this->getMockBuilder( SearchModifier::class )
+						->disableOriginalConstructor()
+						->onlyMethods( array( 'modify' ) )
+						->getMock();
+
+		$mock_modifier->expects( $this->once() )
+				->method( 'modify' )
+				->willReturn( array( 'mocked' => true ) );
+
+		$this->filter_query_obj->set_modifier( $mock_modifier );
+		$query_args = $method_generate_query_args->invoke( $this->filter_query_obj );
+
+		$this->assertCount( 1, $query_args );
+		$this->assertArrayHasKey( 'mocked', $query_args );
+	}
+
+	public function test_add_post__in() {
+		$mock_post_ids = array( 301, 302, 303, 304, 305 );
+		$query_args = $this->filter_query_obj->get_query_args();
+		$query_args = $this->filter_query_obj->add_post__in( $query_args, $mock_post_ids);
+
+
+		$this->assertArrayHasKey( 'post__in', $query_args );
+		$this->assertEquals( $query_args['post__in'], $mock_post_ids );
+
+		$mock_post_ids_1 = array( 301, 305, 402, 403, 404 );
+		$query_args = $this->filter_query_obj->add_post__in( $query_args, $mock_post_ids_1);
+		$this->assertEquals( $query_args['post__in'], array( 301,305 ) );
+
+		//TODO: add test where return is empty or -1
+
+	}
 }

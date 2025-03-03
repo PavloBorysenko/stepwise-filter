@@ -79,7 +79,7 @@ class WCFilterQuery implements FilterQuery {
 	 */
 	public function get_query_args(): array {
 		// TODO if ther is cache and search modifier. chenge args - add post__in.
-		return $this->generate_query_args();
+		return $this->generate_query_for_ids();
 	}
 
 	/**
@@ -96,13 +96,57 @@ class WCFilterQuery implements FilterQuery {
 	}
 
 	/**
+	 * Generate query args for count.
+	 *
+	 * @return array
+	 */
+	private function generate_query_for_count(): array {
+		$args                   = $this->generate_query_args();
+		$args['posts_per_page'] = 1;
+		return $args;
+	}
+
+	/**
+	 * Generate query args for ids.
+	 *
+	 * @return array
+	 */
+	private function generate_query_for_ids(): array {
+		$args                   = $this->generate_query_args();
+		$args['posts_per_page'] = -1;
+		return $args;
+	}
+
+	/**
+	 * Add post__in.
+	 *
+	 * @param array $query_args Query args.
+	 * @param array $post_ids Post ids.
+	 * @return array
+	 */
+	public function add_post__in( array $query_args, array $post_ids ): array {
+
+		if ( empty( $query_args['post__in'] ) ) {
+			$query_args['post__in'] = $post_ids;
+		} else {
+			$query_args['post__in'] = array_values( array_intersect( $query_args['post__in'], $post_ids ) );
+		}
+
+		return $query_args;
+	}
+
+	/**
 	 * Get ids.
 	 *
 	 * @return array post ids.
 	 */
 	public function get_ids(): array {
 
-		$args = $this->generate_query_args();
+		$args = $this->generate_query_for_ids();
+
+		if ( $this->check_is_empty_result( $args ) ) {
+			return array();
+		}
 
 		$post_ids = $this->cache->get( $args );
 
@@ -118,11 +162,47 @@ class WCFilterQuery implements FilterQuery {
 	}
 
 	/**
+	 * Get count.
+	 *
+	 * @return int
+	 */
+	public function get_count(): int {
+
+		$args = $this->generate_query_for_count();
+
+		if ( $this->check_is_empty_result( $args ) ) {
+			return 0;
+		}
+
+		$count = $this->cache->get( $args );
+		if ( is_int( $count ) ) {
+			return $count;
+		}
+
+		$this->query->query( $args );
+		$count = $this->query->found_posts;
+
+		$this->cache->set( $args, $count );
+
+		return $count;
+	}
+
+	/**
 	 * Is search.
 	 *
 	 * @return bool
 	 */
 	public function is_search(): bool {
 		return null !== $this->search_modifier;
+	}
+
+	/**
+	 * Check is empty result.
+	 *
+	 * @param array $args Query args.
+	 * @return bool
+	 */
+	private function check_is_empty_result( $args ): bool {
+		return isset( $args['post__in'] ) && empty( $args['post__in'] );
 	}
 }

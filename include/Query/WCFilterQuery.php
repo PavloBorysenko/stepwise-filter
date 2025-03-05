@@ -78,8 +78,10 @@ class WCFilterQuery implements FilterQuery {
 	 * @return array
 	 */
 	public function get_query_args(): array {
-		// TODO if ther is cache and search modifier. chenge args - add post__in.
-		return $this->generate_query_for_ids();
+		// Query optimization.
+		$search_args = $this->change_search_to_post_in( $this->generate_query_for_ids() );
+
+		return $search_args;
 	}
 
 	/**
@@ -101,8 +103,9 @@ class WCFilterQuery implements FilterQuery {
 	 * @return array
 	 */
 	private function generate_query_for_count(): array {
-		$args                   = $this->generate_query_args();
-		$args['posts_per_page'] = 1;
+		$args                    = $this->generate_query_args();
+		$args['posts_per_page']  = 1;
+		$args['stepwise_filter'] = 'count';
 		return $args;
 	}
 
@@ -112,8 +115,9 @@ class WCFilterQuery implements FilterQuery {
 	 * @return array
 	 */
 	private function generate_query_for_ids(): array {
-		$args                   = $this->generate_query_args();
-		$args['posts_per_page'] = -1;
+		$args                    = $this->generate_query_args();
+		$args['posts_per_page']  = -1;
+		$args['stepwise_filter'] = 'ids';
 		return $args;
 	}
 
@@ -130,6 +134,26 @@ class WCFilterQuery implements FilterQuery {
 			$query_args['post__in'] = $post_ids;
 		} else {
 			$query_args['post__in'] = array_values( array_intersect( $query_args['post__in'], $post_ids ) );
+		}
+
+		return $query_args;
+	}
+
+	/**
+	 * Change search to post_in to optimization wp query.
+	 *
+	 * @param array $query_args Query args.
+	 * @return array
+	 */
+	private function change_search_to_post_in( array $query_args ): array {
+
+		if ( $this->is_search() ) {
+			$cached_ids = $this->cache->get( $query_args );
+			if ( is_array( $cached_ids ) ) {
+				$search_args                   = $this->add_post__in( $this->query_args, $cached_ids );
+				$search_args['posts_per_page'] = isset( $query_args['posts_per_page'] ) ? $query_args['posts_per_page'] : -1;
+				return $search_args;
+			}
 		}
 
 		return $query_args;

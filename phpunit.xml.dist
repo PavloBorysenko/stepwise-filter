@@ -14,6 +14,7 @@
 			<file>tests/testError.php</file>
 			<file>tests/testSubmit.php</file>
 			<file>tests/testWCFilterQuery.php</file>
+			<file>tests/testTaxSearchModifier.php</file>
     </testsuite>
   </testsuites>
   <groups>

@@ -20,6 +20,13 @@ abstract class SearchModifier {
 	private ?SearchModifier $next_modifier = null;
 
 	/**
+	 * Set search terms for hot swapping search terms
+	 *
+	 * @param array $search_terms Search terms.
+	 */
+	abstract public function set_search_terms( array $search_terms ): void;
+
+	/**
 	 * Add modifier.
 	 *
 	 * @param SearchModifier $modifier Modifier.

@@ -69,49 +69,71 @@ class TestWCFilterQuery extends WP_UnitTestCase {
 		$this->assertEquals( $new_initial_query_args['post_type'], $query_args['post_type'] );
 	}
 
-	public function test_get_query_args() {
-		$mock_post_ids = array( 301, 302, 303 );
+	/**
+	 * Test change search to post in.
+	 */
+	public function test_change_search_to_post_in() {
+
 		$reflection_filter_query = new ReflectionClass( $this->filter_query_obj );
 		$cache_property          = $reflection_filter_query->getProperty( 'cache' );
 		$cache_property->setAccessible( true );
 
+		$property_query_args = $reflection_filter_query->getProperty( 'query_args' );
+		$property_query_args->setAccessible( true );
+
+		$method_hange_search_to_post_in = $reflection_filter_query->getMethod( 'change_search_to_post_in' );
+		$method_hange_search_to_post_in->setAccessible( true );
+
+		$mock_post_ids                  = array( 301, 302, 303 );
+		$initial_args                   = $property_query_args->getValue( $this->filter_query_obj );
+		$initial_args['posts_per_page'] = 77;
+
+		// Query args should not change without search modifier.
+		$query_args = $method_hange_search_to_post_in->invoke( $this->filter_query_obj, $initial_args );
+
+		$this->assertArrayNotHasKey( 'post__in', $query_args );
+		$this->assertEquals( $query_args, $initial_args );
+
 		$mock_modifier = $this->getMockBuilder( SearchModifier::class )
 		->disableOriginalConstructor()
-		->onlyMethods( array( 'modify' ) )
+		->onlyMethods( array( 'set_search_terms', 'modify' ) )
 		->getMock();
 
 		$mock_modifier->method( 'modify' )
 		->willReturn( array( 'mocked' => true ) );
 
-		$query_args = $this->filter_query_obj->get_query_args();
+		$mock_modifier->method( 'set_search_terms' );
 
+				// Set modifier to get is_search set to true.
+		$this->filter_query_obj->set_modifier( $mock_modifier );
+
+		$wp_cache_mock = $this->getMockBuilder( WPCache::class )
+		->onlyMethods( array( 'get' ) )
+		->getMock();
+
+		$wp_cache_mock->method( 'get' )
+		->with( $this->equalTo( $initial_args ) )
+		->willReturn( $mock_post_ids );
+
+		$cache_property->setValue( $this->filter_query_obj, $wp_cache_mock );
+
+		// Query args should have post__in set.
+		$query_arg_optimized = $method_hange_search_to_post_in->invoke( $this->filter_query_obj, $initial_args );
+
+		$query_args['post__in'] = $mock_post_ids;
+		$this->assertEquals( $query_args, $query_arg_optimized );
+	}
+
+	/**
+	 * Test get query args.
+	 */
+	public function test_get_query_args() {
+
+		$query_args = $this->filter_query_obj->get_query_args();
 		$this->assertArrayHasKey( 'post_type', $query_args );
 		$this->assertArrayHasKey( 'wc_query', $query_args );
 		$this->assertArrayHasKey( 'stepwise_filter', $query_args );
 		$this->assertArrayHasKey( 'posts_per_page', $query_args );
-
-		// Set modifier to get is_search set to true.
-		$this->filter_query_obj->set_modifier( $mock_modifier );
-
-		$query_arg_searched = $this->filter_query_obj->get_query_args();
-
-		$this->assertCount( 2, $query_arg_searched );
-		$this->assertArrayHasKey( 'mocked', $query_arg_searched );
-		$this->assertArrayHasKey( 'posts_per_page', $query_arg_searched );
-
-		$WPCache_mock = $this->getMockBuilder( WPCache::class )
-			->onlyMethods( array( 'get' ) )
-			->getMock();
-
-		$WPCache_mock->method( 'get' )
-			->with($this->equalTo($query_arg_searched))
-			->willReturn( $mock_post_ids );
-
-		$cache_property->setValue( $this->filter_query_obj, $WPCache_mock );
-
-		$query_arg_optimized = $this->filter_query_obj->get_query_args();
-		$query_args['post__in'] =  $mock_post_ids;
-		$this->assertSame( $query_args, $query_arg_optimized);
 	}
 
 	/**
@@ -216,19 +238,20 @@ class TestWCFilterQuery extends WP_UnitTestCase {
 
 		$mock_modifier = $this->getMockBuilder( SearchModifier::class )
 						->disableOriginalConstructor()
-						->onlyMethods( array( 'modify' ) )
+						->onlyMethods( array( 'set_search_terms', 'modify' ) )
 						->getMock();
 
 		$mock_modifier->expects( $this->once() )
 				->method( 'modify' )
 				->willReturn( array( 'mocked' => true ) );
 
+		$mock_modifier->method( 'set_search_terms' );
+
 		$this->filter_query_obj->set_modifier( $mock_modifier );
 		$query_args = $method_generate_query_args->invoke( $this->filter_query_obj );
 
 		$this->assertCount( 1, $query_args );
 		$this->assertArrayHasKey( 'mocked', $query_args );
-
 	}
 
 	/**

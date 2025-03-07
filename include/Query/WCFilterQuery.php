@@ -149,7 +149,7 @@ class WCFilterQuery implements FilterQuery {
 
 		if ( $this->is_search() ) {
 			$cached_ids = $this->cache->get( $query_args );
-			if ( is_array( $cached_ids ) ) {
+			if ( is_array( $cached_ids ) && 200 > count($cached_ids) ) {
 				$search_args                   = $this->add_post__in( $this->query_args, $cached_ids );
 				$search_args['posts_per_page'] = isset( $query_args['posts_per_page'] ) ? $query_args['posts_per_page'] : -1;
 				return $search_args;

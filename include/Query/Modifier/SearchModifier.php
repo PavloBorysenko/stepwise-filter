@@ -24,7 +24,7 @@ abstract class SearchModifier {
 	 *
 	 * @param array $search_terms Search terms.
 	 */
-	abstract public function set_search_terms( array $search_terms ): void;
+	abstract public function set_search_terms( array $search_terms, array $args ): void;
 
 	/**
 	 * Add modifier.

@@ -21,13 +21,15 @@ class TaxSearchModifier extends SearchModifier {
 	 */
 	private array $search_terms = array();
 
+	private array $search_args = array();
+
 	/**
 	 * TaxSearchModifier constructor.
 	 *
 	 * @param string $slug Filter slug.
 	 * @param array  $args Args like array('relation' => 'AND').
 	 */
-	public function __construct( private string $slug, private array $args ) {
+	public function __construct( private string $slug ) {
 	}
 
 	/**
@@ -35,8 +37,9 @@ class TaxSearchModifier extends SearchModifier {
 	 *
 	 * @param array $search_terms Search terms like taxonomy slugs.
 	 */
-	public function set_search_terms( array $search_terms ): void {
+	public function set_search_terms( array $search_terms, array $args ): void {
 		$this->search_terms = $search_terms;
+		$this->search_args  = $args;
 	}
 
 	/**
@@ -45,15 +48,19 @@ class TaxSearchModifier extends SearchModifier {
 	 * @param array $query_args Query args.
 	 * @return array Modified query args.
 	 */
-	public function modify( $query_args ): array {
+	public function modify( array $query_args ): array {
 
-		$query_args['tax_query'] = array(  // phpcs:ignore
-			array(
-				'taxonomy' => $this->slug,
+		if ( !isset($query_args['tax_query']) ) {
+			$query_args['tax_query'] = array(
 				'relation' => 'AND',
+			);
+		}
+		$query_args['tax_query'][] = array(  //phpcs:ignore
+				'taxonomy' => $this->slug,
+				'relation' => isset($this->search_args['relation']) ? $this->search_args['relation'] : 'IN',
+				'field'    => isset($this->search_args['field']) ? $this->search_args['field'] : 'id',
 				'terms'    => $this->search_terms,
-			),
-		);
+			);
 
 		return $query_args;
 	}
